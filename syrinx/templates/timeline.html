@@ -1,60 +1,59 @@
 {% extends "layout.html" %}
 {% block title %}
-  {% if request.endpoint == 'public_timeline' %}
-    Public Timeline
-  {% elif request.endpoint == 'user_timeline' %}
-    {{ profile_user.username }}'s Timeline
-  {% else %}
-    My Timeline
-  {% endif %}
+    {% if request.endpoint == 'public_timeline' %}
+        Public timeline
+    {% elif request.endpoint == 'user_timeline' %}
+        {{ profile_user.username }}'s timeline
+    {% else %}
+        My timeline
+    {% endif %}
 {% endblock %}
 
 {% block body %}
-  <h2>{{ self.title() }}</h2>
-  {% if g.user %}
-    {% if request.endpoint == 'user_timeline' %}
-      <div class=followstatus>
-      {% if g.user.username == profile_user.username %}
-        This is you!
-      {% elif followed %}
-        You are currently following this user.
-        <a class=unfollow href="{{ url_for('unfollow_user', username=profile_user.username)
-          }}">Unfollow user</a>.
-      {% else %}
-        You are not yet following this user.
-        <a class=follow href="{{ url_for('follow_user', username=profile_user.username)
-          }}">Follow user</a>.
-      {% endif %}
-      </div>
-    {% elif request.endpoint == 'timeline' %}
-      <div class=twitbox>
-        <h3>What's on your mind {{ g.user.username }}?</h3>
-        <form action="{{ url_for('add_message') }}" method=post>
-          <p><input type=text name=text size=60><!--
-          --><input type=submit value="Share">
-        </form>
-      </div>
+    <h2>
+        {{ self.title() }}
+    </h2>
+    {% if g.user %}
+        {% if request.endpoint == 'user_timeline' %}
+            <div class="followstatus">
+                {% if g.user.username == profile_user.username %}
+                    This is you!
+                {% elif followed %}
+                    You are currently following this user.
+                    <a class="unfollow" href="{{ url_for('unfollow_user', username=profile_user.username) }}">Unfollow user</a>.
+                {% else %}
+                    You are not yet following this user.
+                    <a class="follow" href="{{ url_for('follow_user', username=profile_user.username) }}">Follow user</a>.
+                {% endif %}
+            </div>
+        {% elif request.endpoint == 'timeline' %}
+            <div class="twitbox">
+                <h3>
+                    What's on your mind {{ g.user.username }}?
+                </h3>
+                <form action="{{ url_for('add_message') }}" method="post">
+                    <p>
+                        <input type="text" name="text" size="60">
+                        <input type="submit" class="button" value="Share">
+                    </p>
+                </form>
+            </div>
+        {% endif %}
     {% endif %}
-  {% endif %}
-  <ul class=messages>
-  {% for message in messages %}
-    <li><img src="{{ message.email|gravatar(size=48) }}"><p>
-      <strong><a href="{{ url_for('user_timeline', username=message.username)
-      }}">{{ message.username }}</a></strong>
-      {{ message.text }}
-      <small>&mdash; {{ message.date_publish }}</small>
-  {% else %}
-    <li><em>There's no message so far.</em>
-  {% endfor %}
-  </ul>
-  {% if not users %}
-    <p>
-      No users.
-    </p>
-  {% endif %}
-  <ul class=users>
-    {% for user in users %}
-      <li>{{ user.username }}</li>
-    {% endfor %}
-  </ul>
+    <ul class="messages">
+        {% for message in messages %}
+            <li>
+                <a href="/{{ message.author }}"><img src="{{ message.email|gravatar(size=48) }}"></a>
+                <p>
+                    <span class="username"><a href="{{ url_for('user_timeline', username=message.username) }}">{{ message.username }}</a></span>
+                    {{ message.text }}
+                    <span class="datepublish">&mdash; {{ message.date_publish }}</span>
+                </p>
+            </li>
+        {% else %}
+            <li>
+                <span class="nomessages">There are no messages so far.</span>
+            </li>
+        {% endfor %}
+    </ul>
 {% endblock %}

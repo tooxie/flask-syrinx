@@ -12,6 +12,10 @@ a:hover {
     color: #333;
 }
 
+a img {
+    border: none;
+}
+
 input[type="text"],
 input[type="password"] {
     background: white;
@@ -119,9 +123,13 @@ div.page ul.messages li img {
     padding: 0 10px 0 0;
 }
 
-div.page ul.messages li small {
+div.page ul.messages li span.datepublish {
     font-size: 0.9em;
     color: #888;
+}
+
+div.page ul.messages li span.nomessages {
+    font-weight: bold;
 }
 
 div.page div.twitbox {
@@ -147,9 +155,10 @@ div.page div.twitbox input[type="text"] {
     width: 585px;
 }
 
-div.page div.twitbox input[type="submit"] {
-    width: 70px;
+div.page div.twitbox input.button {
+    float: right;
     margin-left: 5px;
+    width: 70px;
 }
 
 ul.flashes {
