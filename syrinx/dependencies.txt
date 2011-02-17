@@ -1,0 +1,4 @@
+python-pybabel
+python-sqlalchemy
+sqlalchemy
+speaklater
