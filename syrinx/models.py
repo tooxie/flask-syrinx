@@ -1,33 +1,15 @@
 # -*- coding: utf-8 -*-
-from __future__ import with_statement
-from contextlib import closing
-from flaskext.babel import gettext as _
+# from flaskext.babel import gettext as _
 from flaskext.sqlalchemy import SQLAlchemy
-from flask import Flask, session, g, Module
-from werkzeug import check_password_hash, generate_password_hash
+from werkzeug import generate_password_hash
 from hashlib import sha512, md5
 from datetime import datetime
 from . import app
 from os.path import abspath, dirname
 
-# app = Module(__name__, 'models')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s/syrinx.db' % (
     dirname(abspath(__file__)))
 db = SQLAlchemy(app)
-
-
-def connect_db():
-    """Returns a new connection to the database."""
-    from sqlite3 import dbapi2 as sqlite3
-    return sqlite3.connect(app.config['SQLALCHEMY_DATABASE_URI'])
-
-
-def init_db():
-    """Creates the database tables."""
-    with closing(connect_db()) as db:
-        with app.open_resource('schema.sql') as f:
-            db.cursor().executescript(f.read())
-        db.session.commit()
 
 class User(db.Model):
 
