@@ -16,55 +16,59 @@ a img {
     border: none;
 }
 
-input[type="text"],
-input[type="password"] {
-    background: white;
-    border: 1px solid #BFE6E2;
-    padding: 2px;
-    font-family: 'Trebuchet MS', sans-serif;
-    font-size: 14px;
+input[type="text"], input[type="password"] {
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
+    background: white;
+    border: 1px solid #BFE6E2;
     color: #105751;
+    font-family: 'Trebuchet MS', sans-serif;
+    font-size: 14px;
+    padding: 2px;
 }
 
 input[type="submit"] {
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
     background: #105751;
     border: 1px solid #073B36;
-    padding: 1px 3px;
+    color: white;
     font-family: 'Trebuchet MS', sans-serif;
     font-size: 14px;
     font-weight: bold;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
-    color: white;
+    padding: 1px 3px;
 }
 
 div.page {
     background: white;
     border: 1px solid #6ECCC4;
-    width: 700px;
     margin: 30px auto;
+    width: 700px;
 }
 
 div.page h1 {
     background: #6ECCC4;
+    color: white;
+    font-weight: normal;
+    letter-spacing: 1px;
     margin: 0;
     padding: 10px 14px;
-    color: white;
-    letter-spacing: 1px;
     text-shadow: 0 0 3px #24776F;
-    font-weight: normal;
+}
+
+div.page h1 a {
+    color: white;
+    text-decoration: none;
 }
 
 div.page div.navigation {
     background: #DEE9E8;
-    padding: 4px 10px;
-    border-top: 1px solid #ccc;
     border-bottom: 1px solid #eee;
+    border-top: 1px solid #ccc;
     color: #888;
     font-size: 12px;
     letter-spacing: 0.5px;
+    padding: 4px 10px;
 }
 
 div.page div.navigation a {
@@ -73,8 +77,8 @@ div.page div.navigation a {
 }
 
 div.page h2 {
-    margin: 0 0 15px 0;
     color: #105751;
+    margin: 0 0 15px 0;
     text-shadow: 0 1px 2px #ccc;
 }
 
@@ -85,17 +89,17 @@ div.page div.body {
 div.page div.footer {
     background: #eee;
     color: #888;
-    padding: 5px 10px;
     font-size: 12px;
+    padding: 5px 10px;
 }
 
 div.page div.followstatus {
-    border: 1px solid #ccc;
-    background: #E3EBEA;
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
-    padding: 3px;
+    background: #E3EBEA;
+    border: 1px solid #ccc;
     font-size: 13px;
+    padding: 3px;
 }
 
 div.page ul.messages {
@@ -105,13 +109,13 @@ div.page ul.messages {
 }
 
 div.page ul.messages li {
-    margin: 10px 0;
-    padding: 5px;
-    background: #F0FAF9;
-    border: 1px solid #DBF3F1;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
+    background: #F0FAF9;
+    border: 1px solid #DBF3F1;
+    margin: 10px 0;
     min-height: 48px;
+    padding: 5px;
 }
 
 div.page ul.messages p {
@@ -124,8 +128,8 @@ div.page ul.messages li img {
 }
 
 div.page ul.messages li span.datepublish {
-    font-size: 0.9em;
     color: #888;
+    font-size: 0.9em;
 }
 
 div.page ul.messages li span.nomessages {
@@ -133,26 +137,31 @@ div.page ul.messages li span.nomessages {
 }
 
 div.page div.twitbox {
-    margin: 10px 0;
-    padding: 5px;
-    background: #F0FAF9;
-    border: 1px solid #94E2DA;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
+    background: #F0FAF9;
+    border: 1px solid #94E2DA;
+    margin: 10px 0;
+    padding: 5px;
 }
 
 div.page div.twitbox h3 {
-    margin: 0;
-    font-size: 1em;
     color: #2C7E76;
+    font-size: 1em;
+    margin: 0;
 }
 
 div.page div.twitbox p {
     margin: 0;
 }
 
-div.page div.twitbox input[type="text"] {
+div.page div.twitbox input.twitbox {
+    float: left;
     width: 585px;
+}
+
+div.page div.twitbox {
+    overflow: auto;
 }
 
 div.page div.twitbox input.button {
@@ -168,20 +177,20 @@ ul.flashes {
 }
 
 ul.flashes li {
-    background: #B9F3ED;
-    border: 1px solid #81CEC6;
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
-    padding: 4px;
+    background: #B9F3ED;
+    border: 1px solid #81CEC6;
     font-size: 13px;
+    padding: 4px;
 }
 
 div.error {
-    margin: 10px 0;
-    background: #FAE4E4;
-    border: 1px solid #DD6F6F;
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
-    padding: 4px;
+    background: #FAE4E4;
+    border: 1px solid #DD6F6F;
     font-size: 13px;
+    margin: 10px 0;
+    padding: 4px;
 }

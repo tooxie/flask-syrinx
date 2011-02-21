@@ -33,7 +33,7 @@
                 </h3>
                 <form action="{{ url_for('add_message') }}" method="post">
                     <p>
-                        <input type="text" name="text" size="60">
+                        <input type="text" class="twitbox" name="text" size="60">
                         <input type="submit" class="button" value="Share">
                     </p>
                 </form>
@@ -43,7 +43,11 @@
     <ul class="messages">
         {% for message in messages %}
             <li>
-                <a href="/{{ message.author }}"><img src="{{ message.email|gravatar(size=48) }}"></a>
+                {% if g.user.username == message.author %}
+                    <img src="{{ message.email|gravatar(size=48) }}">
+                {% else %}
+                    <a href="/{{ message.author }}"><img src="{{ message.email|gravatar(size=48) }}"></a>
+                {% endif %}
                 <p>
                     <span class="username"><a href="{{ url_for('user_timeline', username=message.username) }}">{{ message.username }}</a></span>
                     {{ message.text }}
