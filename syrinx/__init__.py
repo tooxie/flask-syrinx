@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
 """
-    Syrinx
-    ~~~~~~
+Syrinx
+======
 
-    A microblogging application written with Flask and sqlite3.
+A microblogging application written with Flask.
 """
-from hashlib import md5
+from .exceptions import ConfigError
 from datetime import datetime
-from flask import Flask, g
+from flask import Flask
 from flaskext.script import Manager, Server
-
+from hashlib import md5
+import logging
 
 # configuration
 DEBUG = True
-# sha256(md5(str(random())).hexdigest() + str(datetime.now())).hexdigest()
-SECRET_KEY = '64bda706bc018ea5ffffdd67dc58caf184600651eea4150abb2b8008bde59ae1'
+SECRET_KEY = '+EizlUhw+0dky2rEwRScXw2ji5tHuwv8BSP6N9NV18UwSiBQ8sOLNmlL5BRL7Cs='
 PER_PAGE = 30
+SERVER_URI = 'syrinx.tw'
 # APP_NAME = 'syrinx'
 
 app = Flask(__name__)
@@ -36,15 +37,13 @@ def gravatar_url(email, size=80):
     return 'http://www.gravatar.com/avatar/%s?d=identicon&s=%d' % \
         (md5(email.strip().lower().encode('utf-8')).hexdigest(), size)
 
-
 # add some filters to jinja
 app.jinja_env.filters['datetimeformat'] = format_datetime
 app.jinja_env.filters['gravatar'] = gravatar_url
 
-
 import views
 import models
 
-
-if __name__ == '__main__':
-    app.run()
+if not app.config['SECRET_KEY']:
+    logging.warning('Missing SECRET_KEY. Run utils.secret_key_gen() to ' + \
+                    'generate one.')
