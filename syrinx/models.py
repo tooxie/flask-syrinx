@@ -4,7 +4,7 @@ from flaskext.sqlalchemy import SQLAlchemy
 from werkzeug import generate_password_hash
 from hashlib import sha512, md5
 from datetime import datetime
-from . import app
+from syrinx import app
 from os.path import abspath, dirname
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s/syrinx.db' % (
@@ -15,22 +15,44 @@ class User(db.Model):
 
     __tablename__ = 'users'
 
-    # id = db.Column(_(u'id'), db.Integer, primary_key=True)
-    username = db.Column(db.String(64), primary_key=True)
-    _password = db.Column(db.String(128))
-    email = db.Column(db.String(50))
-    is_root = db.Column(db.Boolean)
-    date_joined = db.Column(db.DateTime)
-    _salt = db.Column(db.String(32))
+    # Cuando quiero seguir un usuario en otro servidor, se me pregunta
+    # usuario@servidor de mi cuenta, el servicio lo registra y lo guarda en una
+    # cookie para futuros casos. Se tiene que dar la opción a eliminarlo.
 
-    def __init__(self, username, password=None, email='', is_root=False):
+    # id = db.Column(_(u'id'), db.Integer, primary_key=True)
+    username = db.Column(db.String(64), primary_key=True, index=True)
+    server = db.Column(db.String(64), primary_key=True, index=True,
+        nullable=True)
+    _password = db.Column(db.String(128), nullable=True)
+    name = db.Column(db.String(64), nullable=True)
+    email = db.Column(db.String(64))
+    location = db.Column(db.String(64), nullable=True)
+    web = db.Column(db.String(64), nullable=True)
+    profile_uri = db.Column(db.String(64), nullable=True)
+    is_root = db.Column(db.Boolean, default=False)
+    date_joined = db.Column(db.DateTime, nullable=True)
+    _salt = db.Column(db.String(32), nullable=True)
+
+    db.PrimaryKeyConstraint('username', 'server')
+    db.UniqueConstraint('username', 'server', name='user_id')
+
+    def __init__(self, username, server='', password=None, name='', email='',
+                 location='', web='', profile_uri='', is_root=False):
+        # [a-zA-z0-9_\-]
         self.username = username
+        self.server = server
         self.password = password
+        self.name = name
         self.email = email
+        self.location = location
+        self.web = web
+        self.profile_uri = profile_uri  # URI del perfil del usuario remoto.
         self.is_root = is_root
         self.date_joined = datetime.now()
 
     def __unicode__(self):
+        if self.server:
+            return '%s@%s' % (self.username, self.server)
         return self.username
 
     @property
@@ -100,4 +122,4 @@ class Message(db.Model):
 
     @property
     def email(self):
-        return User.query.get(self.author).email
+        return User.query.get((self.author, '')).email
