@@ -4,8 +4,8 @@ from flask import (Module, request, session, url_for, redirect,
     render_template, abort, g, flash)
 from werkzeug import check_password_hash, generate_password_hash  # FIXME
 from models import User, Message, Follower
-from . import app
-from .models import db
+from syrinx import app
+from syrinx.models import db
 
 # app = Module(__name__, 'views')
 
@@ -17,7 +17,7 @@ def before_request():
     """
     g.user = None
     if 'username' in session:
-        g.user = User.query.get(session['username'])
+        g.user = User.query.get((session['username'], ''))
 
 
 @app.route('/')
@@ -57,7 +57,7 @@ def public_timeline():
 @app.route('/<username>')
 def user_timeline(username):
     """Display's a users tweets."""
-    profile_user = User.query.get_or_404(username)
+    profile_user = User.query.get_or_404((username, ''))
     followed = False
     if g.user:
         followed = Follower.query.get((session['username'],
@@ -83,9 +83,9 @@ def follow_user(username):
     """Adds the current user as follower of the given user."""
     if not g.user:
         abort(401)
-    user = User.query.get_or_404(g.user.username)
-    whom = User.query.get_or_404(username)
-    follower = Follower(user, whom)
+    user = User.query.get_or_404((g.user.username, ''))
+    whom = User.query.get_or_404((username, ''))
+    follower = Follower(who=user, whom=whom)
     db.session.add(follower)
     db.session.commit()
     flash('You are now following "%s"' % username)
@@ -97,7 +97,7 @@ def unfollow_user(username):
     """Removes the current user as follower of the given user."""
     if not g.user:
         abort(401)
-    user = User.query.get_or_404(username)
+    user = User.query.get_or_404((username, ''))
     whom = user.username
     follower = Follower.query.get((session['username'], whom,))
     db.session.delete(follower)
@@ -106,13 +106,14 @@ def unfollow_user(username):
     return redirect(url_for('user_timeline', username=username))
 
 
-@app.route('/add_message', methods=['POST'])
+@app.route('/add-message', methods=['POST'])
 def add_message():
     """Registers a new message for the user."""
     if 'username' not in session:
         abort(401)
     if request.form['text']:
-        message = Message(session['username'], request.form['text'])
+        message = Message(author=session['username'],
+            text=request.form['text'])
         db.session.add(message)
         db.session.commit()
         flash('Your message was recorded')
@@ -126,7 +127,7 @@ def login():
         return redirect(url_for('timeline'))
     error = None
     if request.method == 'POST':
-        user = User.query.get(request.form['username'])
+        user = User.query.get((request.form['username'], ''))
         if user is None:
             error = 'Invalid username'
         elif not check_password_hash(user._password, request.form['password']):
@@ -157,8 +158,10 @@ def register():
         elif not User.query.filter_by(username=request.form['username']):
             error = 'The username is already taken'
         else:
-            user = User(request.form['username'], request.form['password'],
-                request.form['email'])
+            user = User(
+                username=request.form['username'],
+                password=request.form['password'],
+                email=request.form['email'])
             db.session.add(user)
             db.session.commit()
             flash('You were successfully registered and can login now')
