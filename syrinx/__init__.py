@@ -11,13 +11,17 @@ from flask import Flask
 from flaskext.script import Manager, Server
 from hashlib import md5
 import logging
+import sys
 
-# configuration
-DEBUG = True
-SECRET_KEY = '+EizlUhw+0dky2rEwRScXw2ji5tHuwv8BSP6N9NV18UwSiBQ8sOLNmlL5BRL7Cs='
-PER_PAGE = 30
-SERVER_URI = 'syrinx.tw'
-# APP_NAME = 'syrinx'
+__version__ = '0.1.1'
+__flask_version__ = '0.6.1'
+
+try:
+    from settings import *
+except ImportError:
+    # cp settings.py-customize settings.py
+    logging.warning('Could not find local settings. Aborting...')
+    sys.exit(1)
 
 app = Flask(__name__)
 app.config.from_object(__name__)

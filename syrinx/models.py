@@ -5,10 +5,6 @@ from werkzeug import generate_password_hash
 from hashlib import sha512, md5
 from datetime import datetime
 from syrinx import app
-from os.path import abspath, dirname
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s/syrinx.db' % (
-    dirname(abspath(__file__)))
 db = SQLAlchemy(app)
 
 class User(db.Model):
