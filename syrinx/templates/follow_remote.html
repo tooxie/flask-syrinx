@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Follow {{ user.username }}
+{% endblock %}
+
+{% block body %}
+    <h2>
+        Follow {{ user.username }}
+    </h2>
+    {% if error %}
+        <div class="error">
+            <span class="errorlabel">Error:</span> {{ error }}
+        </div>
+    {% endif %}
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        {% if form.account.errors %}
+            {% for error in form.account.errors %}
+                <div class="error">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <label>{{ form.account.label }}:</label>
+        {{ form.account }}
+        <p>
+            Your account ID (e.g. rms@identi.ca)
+        </p>
+        <div>
+            <input type="submit" name="follow" value="Follow">
+        </div>
+    </form>
+{% endblock %}

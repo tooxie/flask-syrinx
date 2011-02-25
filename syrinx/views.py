@@ -2,10 +2,11 @@
 import time
 from flask import (Module, request, session, url_for, redirect,
     render_template, abort, g, flash)
-from werkzeug import check_password_hash, generate_password_hash  # FIXME
+from werkzeug import check_password_hash, generate_password_hash  # XXX
 from models import User, Message, Follower
 from syrinx import app
 from syrinx.models import db
+from syrinx.forms import FollowForm
 
 # app = Module(__name__, 'views')
 
@@ -82,7 +83,7 @@ def user_timeline(username):
 def follow_user(username):
     """Adds the current user as follower of the given user."""
     if not g.user:
-        abort(401)
+        redirect(url_for('follow_remote', username=username))
     user = User.query.get_or_404((g.user.username, ''))
     whom = User.query.get_or_404((username, ''))
     follower = Follower(who=user, whom=whom)
@@ -90,6 +91,24 @@ def follow_user(username):
     db.session.commit()
     flash('You are now following "%s"' % username)
     return redirect(url_for('user_timeline', username=username))
+
+
+@app.route('/<username>/follow/remote', methods=['GET', 'POST'])
+def follow_remote(username):
+    """Asks for the user's credentials to notify his/her service provider of
+    the subscription."""
+    user = User.query.get_or_404((username, ''))
+    form = FollowForm()
+    if form.validate_on_submit():
+        print('valid!')  # DEBUG
+        import logging  # DEBUG
+        logging.debug('valid!')  # DEBUG
+        username, server = form.account.split('@')
+        remote_user = User(username=username, server=server)
+        db.session.add(remote_user)
+        db.session.commit()
+        # FIXME: Mandarlo a confirmar a su servidor.
+    return render_template('follow_remote.html', form=form, user=user)
 
 
 @app.route('/<username>/unfollow')

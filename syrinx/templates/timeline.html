@@ -13,7 +13,6 @@
     <h2>
         {{ self.title() }}
     </h2>
-    {% if g.user %}
         {% if request.endpoint == 'user_timeline' %}
             <div class="followstatus">
                 {% if g.user.username == profile_user.username %}
@@ -23,9 +22,14 @@
                     <a class="unfollow" href="{{ url_for('unfollow_user', username=profile_user.username) }}">Unfollow user</a>.
                 {% else %}
                     You are not yet following this user.
-                    <a class="follow" href="{{ url_for('follow_user', username=profile_user.username) }}">Follow user</a>.
+                    {% if g.user %}
+                        <a class="follow" href="{{ url_for('follow_user', username=profile_user.username) }}">Follow user</a>.
+                    {% else %}
+                        <a class="follow" href="{{ url_for('follow_remote', username=profile_user.username) }}">Follow user</a>.
+                    {% endif %}
                 {% endif %}
             </div>
+    {% if g.user %}
         {% elif request.endpoint == 'timeline' %}
             <div class="twitbox">
                 <h3>
