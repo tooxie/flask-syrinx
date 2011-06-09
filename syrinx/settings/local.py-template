@@ -1,0 +1,22 @@
+# -*- coding: utf-8 -*-
+"""
+Local settings, instance-specific.
+"""
+from os.path import abspath, dirname
+
+DEBUG = True
+
+ADMINS = ()
+MANAGERS = ADMINS
+
+SQLALCHEMY_DATABASE_URI = 'sqlite:///%s/syrinx.db' % (dirname(abspath(__file__)))
+
+DEFAULT_FROM_EMAIL = u''
+DOMAIN = ''
+EMAIL_HOST = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_USER = ''
+EMAIL_PORT = 25
+SECRET_KEY = ''
+SERVER_EMAIL = 'root@localhost'
+SERVER_URI = ''
