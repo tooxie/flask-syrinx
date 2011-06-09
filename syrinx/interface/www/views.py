@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-import time
+from syrinx import app
+from syrinx.interface.www.forms import FollowForm
+from syrinx.models import db, User, Message, Follower
+from syrinx.utils.security import check_password_hash
+
 from flask import (Module, request, session, url_for, redirect,
     render_template, abort, g, flash)
-from werkzeug import check_password_hash, generate_password_hash  # XXX
-from models import User, Message, Follower
-from syrinx import app
-from syrinx.models import db
-from syrinx.forms import FollowForm
+import time
 
 # app = Module(__name__, 'views')
 
@@ -27,7 +27,6 @@ def timeline():
     redirect to the public timeline.  This timeline shows the user's
     messages as well as all the messages of followed users.
     """
-    # import pdb; pdb.set_trace()
     if not g.user:
         return redirect(url_for('public_timeline'))
     return render_template('timeline.html',
@@ -67,6 +66,7 @@ def user_timeline(username):
         messages=Message.query.filter_by(
             author=profile_user.username).order_by(
                 'date_publish')[:app.config['PER_PAGE']],
+                # FIXME: Retrive PER_PAGE from a database-stored configuration.
         followed=followed, profile_user=profile_user)
         # ======================================================== #
         #                                                          #
