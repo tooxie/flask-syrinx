@@ -47,5 +47,5 @@ def constant_time_compare(val1, val2):
     return result == 0
 
 
-def secret_key_gen(random_bytes=47):
+def gen_secretkey(random_bytes=47):
     return base64.b64encode(os.urandom(random_bytes)).decode()

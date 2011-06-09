@@ -30,6 +30,11 @@ app.config.from_object(settings)
 manager = Manager(app)
 manager.add_command("runserver", Server())
 
+if app.config['DEBUG']:
+
+    def init_db():
+        raise NotImplementedError
+
 
 def format_datetime(timestamp):
     """Format a timestamp for display."""
@@ -49,4 +54,4 @@ from syrinx import models
 
 if not app.config['SECRET_KEY']:
     logging.warning(' '.join('Missing settings.SECRET_KEY. Run'
-                             'utils.crypto.secret_key_gen() to generate one.'))
+                             'utils.crypto.gen_secretkey() to generate one.'))

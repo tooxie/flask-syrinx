@@ -5,24 +5,26 @@
 
     Tests the Syrinx application.
 """
-import os
+
 import syrinx
-import unittest
+
+import os
 import tempfile
+import unittest
 
 
 class SyrinxTestCase(unittest.TestCase):
 
     def setUp(self):
         """Before each test, set up a blank database"""
-        self.db_fd, Syrinx.app.config['DATABASE'] = tempfile.mkstemp()
-        self.app = Syrinx.app.test_client()
-        Syrinx.init_db()
+        self.db_fd, syrinx.app.config['DATABASE'] = tempfile.mkstemp()
+        self.app = syrinx.app.test_client()
+        syrinx.init_db()
 
     def tearDown(self):
         """Get rid of the database again after each test."""
         os.close(self.db_fd)
-        os.unlink(Syrinx.app.config['DATABASE'])
+        os.unlink(syrinx.app.config['DATABASE'])
 
     # helper functions
 
