@@ -46,16 +46,41 @@ class BackendMixin(object):
         return get_backend(backend).delete(self)
 
 
-class BackendDictMixin(dict):
+class FollowMixin(object):
+    """Backend functionality for local users.
+    """
+
+    def add_list(self, instance, ulist, backend=None):
+        return get_backend(backend).add_list(instance, ulist)
+
+    def add_to_list(self, instance, who, ulist, backend=None):
+        return get_backend(backend).add_to_list(instance, who, ulist)
+
+    def follow(self, instance, who, backend=None):
+        return get_backend(backend).follow(instance, who)
+
+    def get_followers(self, instance, backend=None):
+        return get_backend(backend).get_followers(instance)
+
+    def post_notice(self, instance, notice, backend=None):
+        return get_backend(backend).post_notice(instance, notice)
+
+    def send_private_notice(self, instance, notice, backend=None):
+        return get_backend(backend).send_private_notice(instance, notice)
+
+
+class NoticeMixin(object):
+
+    pass
+
+
+class BackendDict(dict):
     """A collection of objects.
     """
 
-    def __init__(self, model, key=None, *args, **kwargs):
+    def __init__(self, model, *args, **kwargs):
         self.model = model
-        # TODO: Implementar las keys.
-        # TODO: Las keys permiten agrupar bajo un 'namespace' una serie de
-        # TODO: modelos.
-        super(BackendDictMixin, self).__init__(*args, **kwargs)
+        super(BackendDict, self).__init__(*args, **kwargs)
 
     def __contains__(self, key, backend=None):
         return get_backend(backend).contains(self, key)
@@ -73,52 +98,8 @@ class BackendDictMixin(dict):
         return get_backend(backend).setitem(self, key, value)
 
 
-class FollowMixin(BackendDictMixin):
-    """A users-I-follow dictionary.
+class BackendList(list):
+    """A list of objects.
     """
 
-    def __contains__(self, key, backend=None):
-        return get_backend(backend).contains(self, key)
-
-    def __delitem__(self, key, backend=None):
-        return get_backend(backend).delitem(self, key)
-
-    def __getitem__(self, key, backend=None):
-        return get_backend(backend).getitem(self, key)
-
-    def __len__(self, backend=None):
-        return get_backend(backend).len(self)
-
-    def __setitem__(self, key, value, backend=None):
-        return get_backend(backend).setitem(self, key, value)
-
-
-class FollowerDict(FollowerMixin):
-    """A users-who-follow-me dictionary.
-    """
-
-    def add(self, item, backend=None):
-        return get_backend(backend).add(self, item)
-
-    def __contains__(self, key, backend=None):
-        return get_backend(backend).contains(self, key)
-
-    def __delitem__(self, key, backend=None):
-        return get_backend(backend).delitem(self, key)
-
-    def __getitem__(self, key, backend=None):
-        return get_backend(backend).getitem(self, key)
-
-    def __len__(self, backend=None):
-        return get_backend(backend).len(self)
-
-    def __setitem__(self, key, value, backend=None):
-        return get_backend(backend).setitem(self, key, value)
-
-
-class FollowersMixin(object):
-    """A followers mixin.
-    """
-
-    def get_followers(self, backend=None):
-        return get_backend(backend).get_followers(self)
+    pass

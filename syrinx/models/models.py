@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 from syrinx import app
-from syrinx.models.backends import (BackendMixin, BackendDictMixin,
-    FollowerMixin, FollowMixin,)
+from syrinx.models.backends import (
+BackendMixin,
+BackendDict,
+BackendList,
+NoticeMixin,
+FollowMixin,
+)
 from syrinx.utils.security import generate_password_hash
 
 from datetime import datetime
@@ -9,72 +14,9 @@ from flaskext.sqlalchemy import SQLAlchemy
 from hashlib import sha512, md5
 
 
-# DEPRECATED
-class FollowerDict(FollowerMixin):
-    """A users-who-follow-me dictionary.
-    """
-
-    def __init__(self, users=[], *args, **kwargs):
-        self.model = User
-        for user in users:
-            self.add(user)
-        super(UserDict, self).__init__(*args, **kwargs)
-
-
-class FollowDict(FollowMixin):
-    """A users-I-follow dictionary.
-    """
-
-    def __init__(self, users=[], *args, **kwargs):
-        self.model = User
-        for user in users:
-            self.add(user)
-        super(UserDict, self).__init__(*args, **kwargs)
-
-
-class ListMemberDict(ListMemberMixin):
-    """A users dictionary.
-    """
-
-    def __init__(self, members=[], *args, **kwargs):
-        self.model = User
-        for member in members:
-            self.add(member)
-        super(UserDict, self).__init__(*args, **kwargs)
-
-
-class NoticeDict(NoticeMixin):
-    """A notices dictionary.
-    """
-
-    pass
-
-
-class PrivateNoticeDict(PrivateNoticeMixin):
-    """A notices dictionary.
-    """
-
-    pass
-# /DEPRECATED
-
-
-class NamespacedDict(BackendDictMixin):
-    """A custom dictionary with namespace.
-    """
-
-    def __init__(self, model, ns, items=[], *args, **kwargs):
-        self.model = model
-        for item in items:
-            self.add(item)
-        super(NamespacedDict, self).__init__(ns, *args, **kwargs)
-
-
 class User(BackendMixin):
     """A user.
     """
-
-    FOLLOWERS = 'followers'
-    FOLLOWING = 'following'
 
     def __init__(self, username=None, server=None, location=None,
                  profile_uri=None, created=None, *args, **kwargs):
@@ -107,18 +49,15 @@ class RemoteUser(User):
         super(RemoteUser, self).__init__(*args, **kwargs)
 
 
-class LocalUser(User):
+class LocalUser(User, FollowMixin, NoticeMixin):
     """A local user.
-
-    >>> user = LocalUser(pk=1)
-    >>> follower = user.followers.get(pk=3)
     """
 
     def __init__(self, password=None, salt=None, first_name=None,
                  last_name=None, bio=None, status=None, email=None, web=None,
-                 followers=[], following=[], notices=[], private_notices=[],
-                 date_joined=None, user_config=None, admin_user=None,
-                 twitter_user=None, *args, **kwargs):
+                 lists=[], followers={}, following={}, notices=[],
+                 private_notices=[], date_joined=None, user_config=None,
+                 admin_user=None, twitter_user=None, *args, **kwargs):
         # kwargs.get('user') == [a-zA-z0-9_\-]
         self.password = password
         self.salt = salt or self.generate_salt()
@@ -128,19 +67,43 @@ class LocalUser(User):
         self.status = status
         self.email = email
         self.web = web
-        self.followers = NamespacedDict(model=User, ns=User.FOLLOWERS,
-                                        items=followers)
-        self.following = NamespacedDict(model=User, ns=User.FOLLOWING,
-                                        items=following)
-        self.notices = NamespacedDict(model=Notice, ns='Notice', items=notices)
-        self.private_notices = NamespacedDict(model=PrivateNotice,
-                                              ns='PrivateNotice',
-                                              items=private_notices)
+        self.lists = BackendList(lists)
+        self.followers = BackendDict(followers)
+        self.following = BackendDict(following)
+        self.notices = BackendList(notices)
+        self.private_notices = BackendList(private_notices)
         self.date_joined = date_joined or datetime.now()
         self.user_config = user_config
         self.admin_user = admin_user
         self.twitter_user = twitter_user
         super(LocalUser, self).__init__(*args, **kwargs)
+
+    def get_key(self):
+        return '%(username)s@%(server)s' % {
+            'username': self.username,
+            'server': self.server}
+
+    def add_list(self, ulist):
+        self.lists.append(ulist)
+        super(LocalUser, self).add_list(self, ulist)
+
+    def add_to_list(self, ulist, user):
+        ulist.append(self, user)
+        super(LocalUser, self).add_to_list(self, ulist, user)
+
+    def follow(self, user, ulist=None):
+        self.following[user.get_key()] = user
+        if ulist:
+            self.add_to_list(user, ulist)
+        super(LocalUser, self).follow(self, user)
+
+    def post_notice(self, notice):
+        self.notices.append(notice)
+        super(LocalUser, self).post_notice(self, notice)
+
+    def send_private_notice(self, notice):
+        self.private_notices.append(notice)
+        super(LocalUser, self).send_private_notice(self, notice)
 
     @property
     def password(self):
@@ -181,8 +144,7 @@ class AdminUser(BackendMixin):
     """An admin user.
     """
 
-    def __init__(self, user, is_root=False, *args, **kwargs):
-        self.user = user
+    def __init__(self, is_root=False, *args, **kwargs):
         self.is_root = is_root
         super(AdminUser, self).__init__(*args, **kwargs)
 
@@ -207,47 +169,21 @@ class TwitterUser(BackendMixin):
     __str__ = __unicode__
 
 
-class Follower(BackendMixin):
-    """A follower.
-    """
-
-    def __init__(self, who, *args, **kwargs):
-        self.who = who
-        self.date_follow = datetime.now()
-        super(Follower, self).__init__(*args, **kwargs)
-
-    def __unicode__(self):
-        return u"<Follower '%s'>" % self.who.__unicode__()
-
-    __str__ = __unicode__
-
-
-class Followee(BackendMixin):
-    """A followee.
-    """
-
-    def __init__(self, who, *args, **kwargs):
-        self.who = who
-        self.date_follow = datetime.now()
-        super(Followee, self).__init__(*args, **kwargs)
-
-    def __unicode__(self):
-        return u"<Followee '%s'>" % self.who.__unicode__()
-
-    __str__ = __unicode__
-
-
-class List(BackendMixin):
+class UserList(BackendMixin):
     """A list of people I'm following.
     """
 
-    def __init__(self, name, members=[], muted=False, created=None,
+    def __init__(self, name, members={}, muted=False, created=None,
                  *args, **kwargs):
         self.name = name
-        self.members = ListMemberDict(members)
+        self.members = BackendDict(members)
         self.muted = muted
         self.created = created
-        super(List, self).__init__(*args, **kwargs)
+        super(UserList, self).__init__(*args, **kwargs)
+
+    def add_member(self, user):
+        self.members[user.get_key()] = user
+        super(UserList, self).add_member(self, user)
 
     def __unicode__(self):
         return self.name
