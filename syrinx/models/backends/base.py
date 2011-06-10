@@ -46,3 +46,6 @@ class BaseModelBackend(object):
 
     def send_private_notice(self, instance, notice):
         raise NotImplementedError
+
+    def add_member(self, instance, item):
+        raise NotImplementedError

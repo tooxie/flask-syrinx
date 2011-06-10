@@ -4,6 +4,7 @@ from syrinx.models.backends import (
 BackendMixin,
 BackendDict,
 BackendList,
+BackendListMixin,
 NoticeMixin,
 FollowMixin,
 )
@@ -25,7 +26,12 @@ class User(BackendMixin):
         self.location = location
         self.profile_uri = profile_uri
         self.created = created or datetime.now()
-        super(User, self).__init__(*args, **kwargs)
+        super(User, self).__init__()
+
+    def get_key(self):
+        return '%(username)s@%(server)s' % {
+            'username': self.username,
+            'server': self.server}
 
     def __unicode__(self):
         return u'%(username)s@%(server)s' % {
@@ -55,9 +61,8 @@ class LocalUser(User, FollowMixin, NoticeMixin):
 
     def __init__(self, password=None, salt=None, first_name=None,
                  last_name=None, bio=None, status=None, email=None, web=None,
-                 lists=[], followers={}, following={}, notices=[],
-                 private_notices=[], date_joined=None, user_config=None,
-                 admin_user=None, twitter_user=None, *args, **kwargs):
+                 date_joined=None, user_config=None, admin_user=None,
+                 twitter_user=None, *args, **kwargs):
         # kwargs.get('user') == [a-zA-z0-9_\-]
         self.password = password
         self.salt = salt or self.generate_salt()
@@ -67,43 +72,41 @@ class LocalUser(User, FollowMixin, NoticeMixin):
         self.status = status
         self.email = email
         self.web = web
-        self.lists = BackendList(lists)
-        self.followers = BackendDict(followers)
-        self.following = BackendDict(following)
-        self.notices = BackendList(notices)
-        self.private_notices = BackendList(private_notices)
         self.date_joined = date_joined or datetime.now()
         self.user_config = user_config
         self.admin_user = admin_user
         self.twitter_user = twitter_user
+
+        self.lists = BackendList()
+        self.followers = BackendDict()
+        self.following = BackendDict()
+        self.notices = BackendList()
+        self.private_notices = BackendList()
+
         super(LocalUser, self).__init__(*args, **kwargs)
 
-    def get_key(self):
-        return '%(username)s@%(server)s' % {
-            'username': self.username,
-            'server': self.server}
-
-    def add_list(self, ulist):
+    def add_list(self, ulist, *args, **kwargs):
         self.lists.append(ulist)
-        super(LocalUser, self).add_list(self, ulist)
+        super(LocalUser, self).add_list(self, ulist, *args, **kwargs)
 
-    def add_to_list(self, ulist, user):
-        ulist.append(self, user)
-        super(LocalUser, self).add_to_list(self, ulist, user)
+    def add_to_list(self, ulist, user, *args, **kwargs):
+        ulist.add_member(user, *args, **kwargs)
+        super(LocalUser, self).add_to_list(self, ulist, user, *args, **kwargs)
 
-    def follow(self, user, ulist=None):
+    def follow(self, user, ulist=None, *args, **kwargs):
         self.following[user.get_key()] = user
         if ulist:
             self.add_to_list(user, ulist)
-        super(LocalUser, self).follow(self, user)
+        super(LocalUser, self).follow(self, user, *args, **kwargs)
 
-    def post_notice(self, notice):
+    def post_notice(self, notice, *args, **kwargs):
         self.notices.append(notice)
-        super(LocalUser, self).post_notice(self, notice)
+        super(LocalUser, self).post_notice(self, notice, *args, **kwargs)
 
-    def send_private_notice(self, notice):
+    def send_private_notice(self, notice, *args, **kwargs):
         self.private_notices.append(notice)
-        super(LocalUser, self).send_private_notice(self, notice)
+        super(LocalUser, self).send_private_notice(self, notice, *args,
+                                                   **kwargs)
 
     @property
     def password(self):
@@ -169,7 +172,7 @@ class TwitterUser(BackendMixin):
     __str__ = __unicode__
 
 
-class UserList(BackendMixin):
+class UserList(BackendMixin, BackendListMixin):
     """A list of people I'm following.
     """
 
@@ -181,9 +184,9 @@ class UserList(BackendMixin):
         self.created = created
         super(UserList, self).__init__(*args, **kwargs)
 
-    def add_member(self, user):
+    def add_member(self, user, *args, **kwargs):
         self.members[user.get_key()] = user
-        super(UserList, self).add_member(self, user)
+        super(UserList, self).add_member(self, user, *args, **kwargs)
 
     def __unicode__(self):
         return self.name

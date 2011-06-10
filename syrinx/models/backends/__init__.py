@@ -9,6 +9,8 @@ def get_backend(backend=None, *args, **kwargs):
             return BACKEND
         except NameError:
             pass
+    if backend and callable(backend):
+        return backend
     path = backend or settings.MODEL_BACKEND
     try:
         mod_name, klass_name = path.rsplit('.', 1)
@@ -46,6 +48,14 @@ class BackendMixin(object):
         return get_backend(backend).delete(self)
 
 
+class BackendListMixin(object):
+    """A backend list mixin.
+    """
+
+    def add_member(self, instance, item, backend=None):
+        return get_backend(backend).add_member(instance, item)
+
+
 class FollowMixin(object):
     """Backend functionality for local users.
     """
@@ -78,10 +88,6 @@ class BackendDict(dict):
     """A collection of objects.
     """
 
-    def __init__(self, model, *args, **kwargs):
-        self.model = model
-        super(BackendDict, self).__init__(*args, **kwargs)
-
     def __contains__(self, key, backend=None):
         return get_backend(backend).contains(self, key)
 
@@ -102,4 +108,10 @@ class BackendList(list):
     """A list of objects.
     """
 
-    pass
+    items = []
+
+    def append(self, item, backend=None):
+        return get_backend(backend).append(self, item)
+
+    def __len__(self, backend=None):
+        return get_backend(backend).len(self)
