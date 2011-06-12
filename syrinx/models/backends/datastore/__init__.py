@@ -1,26 +1,54 @@
 # -*- coding: utf-8 -*-
+from syrinx.models.backends.base import BaseModelBackend
+
 from google.appengine.ext import db
 
 
-class User(db.Model):
-    """
-    A user.
-    """
+class ModelBackend(BaseModelBackend):
 
     pass
 
 
-class Follower(db.Model):
-    """
-    A follower.
-    """
+class UserBackend(ModelBackend):
 
     pass
 
 
-class Message(db.Model):
-    """
-    A message.
-    """
+class RemoteUserBackend(ModelBackend):
+
+    pass
+
+
+class LocalUserBackend(ModelBackend):
+
+    pass
+
+
+class UserConfigBackend(ModelBackend):
+
+    pass
+
+
+class AdminUserBackend(ModelBackend):
+
+    pass
+
+
+class TwitterUserBackend(ModelBackend):
+
+    pass
+
+
+class UserListBackend(ModelBackend):
+
+    pass
+
+
+class NoticeBackend(ModelBackend):
+
+    pass
+
+
+class PrivateNoticeBackend(ModelBackend):
 
     pass

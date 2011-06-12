@@ -14,3 +14,48 @@ class ModelBackend(BaseModelBackend):
 
     def delete(self, instance):
         raise NotImplementedError
+
+
+class UserBackend(ModelBackend):
+
+    pass
+
+
+class RemoteUserBackend(ModelBackend):
+
+    pass
+
+
+class LocalUserBackend(ModelBackend):
+
+    pass
+
+
+class UserConfigBackend(ModelBackend):
+
+    pass
+
+
+class AdminUserBackend(ModelBackend):
+
+    pass
+
+
+class TwitterUserBackend(ModelBackend):
+
+    pass
+
+
+class UserListBackend(ModelBackend):
+
+    pass
+
+
+class NoticeBackend(ModelBackend):
+
+    pass
+
+
+class PrivateNoticeBackend(ModelBackend):
+
+    pass
