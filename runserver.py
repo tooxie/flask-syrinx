@@ -9,7 +9,7 @@ if not path.exists(db_path):
     print(' * Database created: %s' % db_path)
     db.create_all()
 
-if not app.config['SECRET_KEY']:
+if not app.config.get('SECRET_KEY', None):
     raise ConfigError(''.join('Missing SECRET_KEY. Run syrinx.utils.',
                               'secret_key_gen() to generate one.'))
 

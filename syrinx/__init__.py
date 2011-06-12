@@ -21,7 +21,7 @@ __version__ = '0.1.2'
 try:
     from syrinx import settings
 except ImportError:
-    logging.error('ERROR: Could not find settings. Aborting...')
+    logging.error('Could not find settings. Aborting...')
     sys.exit(1)
 
 app = Flask(__name__)
@@ -30,7 +30,7 @@ app.config.from_object(settings)
 manager = Manager(app)
 manager.add_command("runserver", Server())
 
-if app.config['DEBUG']:
+if app.config.get('DEBUG', None):
 
     def init_db():
         raise NotImplementedError
