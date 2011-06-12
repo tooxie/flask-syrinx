@@ -1,87 +1,28 @@
 # -*- coding: utf-8 -*-
-from syrinx import settings
-from syrinx.utils import importlib
+from syrinx import app
+from syrinx.models.backends.utils import get_backend
 
 
-def get_backend(backend=None, *args, **kwargs):
-    if not backend:
-        try:
-            return BACKEND
-        except NameError:
-            pass
-    if backend and callable(backend):
-        return backend
-    path = backend or settings.MODEL_BACKEND
-    try:
-        mod_name, klass_name = path.rsplit('.', 1)
-        mod = importlib.import_module(mod_name)
-    except ImportError, e:
-        raise ImproperlyConfigured(
-            'Error importing model backend module %s: "%s"' % (mod_name, e))
-    try:
-        klass = getattr(mod, klass_name)
-    except AttributeError:
-        raise ImproperlyConfigured(
-            'Module "%s" does not define a "%s" class' % (
-                mod_name, klass_name))
-
-    return klass(*args, **kwargs)
-
-BACKEND = get_backend(settings.MODEL_BACKEND)
-
-
-class BackendMixin(object):
-    """A backend mixin.
+class BackendAdapter(type):
+    """A metaclass to select at runtime whether to decorate the class or not.
     """
 
-    def __new__(cls, *args, **kwargs):
-        pk = kwargs.get('pk')
-        if pk:
-            return BACKEND.get(pk)
-        self = object.__new__(cls)
-        return self
-
-    def save(self, backend=None):
-        return get_backend(backend).save(self)
-
-    def delete(self, backend=None):
-        return get_backend(backend).delete(self)
-
-
-class BackendListMixin(object):
-    """A backend list mixin.
-    """
-
-    def add_member(self, instance, item, backend=None):
-        return get_backend(backend).add_member(instance, item)
-
-
-class FollowMixin(object):
-    """Backend functionality for local users.
-    """
-
-    def add_list(self, instance, ulist, backend=None):
-        return get_backend(backend).add_list(instance, ulist)
-
-    def add_to_list(self, instance, who, ulist, backend=None):
-        return get_backend(backend).add_to_list(instance, who, ulist)
-
-    def follow(self, instance, who, backend=None):
-        return get_backend(backend).follow(instance, who)
-
-    def get_followers(self, instance, backend=None):
-        return get_backend(backend).get_followers(instance)
-
-    def post_notice(self, instance, notice, backend=None):
-        return get_backend(backend).post_notice(instance, notice)
-
-    def send_private_notice(self, instance, notice, backend=None):
-        return get_backend(backend).send_private_notice(instance, notice)
-
-
-class NoticeMixin(object):
-
-    pass
+    def __new__(meta, cls, bases, dct):
+        # If a backend is defined I wrap the object with a backend decorator.
+        if app.config.get('MODEL_BACKEND', None):
+            path_to_decorators = 'syrinx.models.backends.decorators'
+            decorator_name = ''.join((cls, 'Decorator'))
+            # Import the decorator
+            wrapper = getattr(__import__(path_to_decorators, fromlist=['']),
+                              decorator_name)
+            # Create the instance of the domain-model which will then be used
+            # as base class for the decorator.
+            wrappee = type.__new__(meta, cls, bases, dct)
+            # Return the wrapper.
+            return type.__new__(meta, decorator_name, (wrappee,),
+                                dict(wrapper.__dict__))
+        # If there's no backend then continue as usual.
+        return type.__new__(meta, cls, bases, dct)
 
 
 class BackendDict(dict):
