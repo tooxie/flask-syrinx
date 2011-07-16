@@ -24,9 +24,6 @@ class DecoratorBase(object):
         self = object.__new__(cls)
         return self
 
-    def __init__(self, *args, **kwargs):
-        print('LocalUserDecorator.__init__')
-
     def save(self, backend=None):
         return get_backend(self, backend).save(self)
 
