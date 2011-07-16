@@ -15,21 +15,11 @@ class BackendAdapter(type):
             # Import the decorator
             wrapper = getattr(__import__(path_to_decorators, fromlist=['']),
                               decorator_name)
-            # Create the instance of the domain-model which will then be used
-            # as base class for the decorator.
-            _bases = ()
-            for klass in bases:
-                if klass.__name__.endswith('Decorator'):
-                    _bases += (getattr(__import__('syrinx.models',
-                                                  fromlist=['']),
-                                       klass.__name__[:-9]),)
-                else:
-                    _bases += (klass,)
-            wrappee = type.__new__(meta, cls, bases, dct)
-            # Return the wrapper.
-            return type.__new__(meta, decorator_name, (wrappee,),
-                                dict(wrapper.__dict__))
-        # If there's no backend then continue as usual.
+            # Apply backend-specific methods and properties.
+            for attr in dir(wrapper):
+                if not attr.startswith('__'):
+                    dct[attr] = getattr(wrapper, attr).__func__
+        # Return the object.
         return type.__new__(meta, cls, bases, dct)
 
 
