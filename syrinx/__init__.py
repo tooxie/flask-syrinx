@@ -55,3 +55,6 @@ from syrinx import models
 if not app.config['SECRET_KEY']:
     logging.warning(' '.join('Missing settings.SECRET_KEY. Run'
                              'utils.crypto.gen_secretkey() to generate one.'))
+
+if __name__ == '__main__':
+    app.run(debug=True)
