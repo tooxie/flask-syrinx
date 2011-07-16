@@ -18,6 +18,5 @@ EMAIL_PORT = 25
 EMAIL_SUBJECT_PREFIX = '[Syrinx] '
 EMAIL_USE_TLS = False
 EMAIL_SIGNATURE_TEMPLATE = 'signature.txt'
-MODEL_BACKEND = 'syrinx.models.backends.sqlalchemy'
 SERVER_EMAIL = 'root@ideal.com.uy'
 TEMPLATES_DIR = join(PROJECT_DIR, 'interface/www/templates')
