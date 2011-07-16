@@ -12,8 +12,6 @@ class User(object):
     """A user.
     """
 
-    __metaclass__ = BackendAdapter
-
     def __init__(self, username=None, server=None, location=None,
                  profile_uri=None, created=None, *args, **kwargs):
         print('User.__init__')
@@ -40,6 +38,8 @@ class RemoteUser(User):
     """A remote user.
     """
 
+    __metaclass__ = BackendAdapter
+
     # Cuando quiero seguir un usuario en otro servidor, se me pregunta
     # usuario@servidor de mi cuenta, el servicio lo registra y lo guarda en una
     # cookie para futuros casos. Se tiene que dar la opción a eliminarlo.
@@ -52,6 +52,8 @@ class RemoteUser(User):
 class LocalUser(User):
     """A local user.
     """
+
+    __metaclass__ = BackendAdapter
 
     lists = []
     followers = {}
