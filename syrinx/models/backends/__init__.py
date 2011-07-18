@@ -8,17 +8,21 @@ class BackendAdapter(type):
     """
 
     def __new__(meta, cls, bases, dct):
-        # If a backend is defined I wrap the object with a backend decorator.
+        # If a backend is defined wrap the object with a backend decorator.
         if app.config.get('MODEL_BACKEND', None):
             path_to_decorators = 'syrinx.models.backends.decorators'
             decorator_name = ''.join((cls, 'Decorator'))
-            # Import the decorator
+            # Import the decorator.
             wrapper = getattr(__import__(path_to_decorators, fromlist=['']),
                               decorator_name)
             # Apply backend-specific methods and properties.
             for attr in dir(wrapper):
                 if not attr.startswith('__'):
-                    dct[attr] = getattr(wrapper, attr).__func__
+                    _attr = getattr(wrapper, attr)
+                    if hasattr(_attr, '__func__'):
+                        dct[attr] = _attr.__func__
+                    else:
+                        dct[attr] = _attr
         # Return the object.
         return type.__new__(meta, cls, bases, dct)
 
