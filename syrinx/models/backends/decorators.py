@@ -31,11 +31,6 @@ class DecoratorBase(object):
         return get_backend(self, backend).delete(self)
 
 
-class UserDecorator(DecoratorBase):
-
-    pass
-
-
 class RemoteUserDecorator(DecoratorBase):
 
     pass
