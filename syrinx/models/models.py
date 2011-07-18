@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from syrinx import app
-from syrinx.utils.security import generate_password_hash
 from syrinx.models.backends import BackendAdapter
 
 from datetime import datetime
 from flaskext.sqlalchemy import SQLAlchemy
-from hashlib import sha512, md5
+import bcrypt
 
 
 class User(object):
@@ -14,7 +13,6 @@ class User(object):
 
     def __init__(self, username=None, server=None, location=None,
                  profile_uri=None, created=None, *args, **kwargs):
-        print('User.__init__')
         self.username = username
         self.server = server or app.config['SERVER_URI']
         self.location = location
@@ -61,14 +59,12 @@ class LocalUser(User):
     notices = []
     private_notices = []
 
-    def __init__(self, password=None, salt=None, first_name=None,
-                 last_name=None, bio=None, status=None, email=None, web=None,
-                 date_joined=None, user_config=None, admin_user=None,
-                 twitter_user=None, *args, **kwargs):
-        print('LocalUser.__init__')
+    def __init__(self, password=None, first_name=None, last_name=None,
+                 bio=None, status=None, email=None, web=None, date_joined=None,
+                 user_config=None, admin_user=None, twitter_user=None,
+                 *args, **kwargs):
         # kwargs.get('user') == [a-zA-z0-9_\-]
         self.password = password
-        self.salt = salt or self.generate_salt()
         self.first_name = first_name
         self.last_name = last_name
         self.bio = bio
@@ -79,8 +75,6 @@ class LocalUser(User):
         self.user_config = user_config
         self.admin_user = admin_user
         self.twitter_user = twitter_user
-        # FIXME: When calling super it returns a LocalUser. Why? How can I make
-        # sure it calls __init__ on User?
         super(LocalUser, self).__init__(*args, **kwargs)
 
     def add_list(self, ulist, *args, **kwargs):
@@ -107,16 +101,10 @@ class LocalUser(User):
     @password.setter
     def password(self, value):
         if value:
-            self._password = generate_password_hash(value, method='sha256')
+            self._password = bcrypt.hashpwd(value, bcrypt.gensalt())
 
     def check_password(self, password):
-        return self.password == generate_password_hash(password,
-                                                       method='sha256')
-
-    def generate_salt(self):
-        return md5('%(now)s$%%&%(secret)s' % {
-            'now': str(datetime.now()),
-            'secret': app.config['SECRET_KEY']}).hexdigest()
+        return self._password = bcrypt.hashpwd(value, bcrypt.gensalt())
 
 
 class UserConfig(object):
